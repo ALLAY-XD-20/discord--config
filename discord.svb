@@ -6,7 +6,7 @@
   "LastModified": "2024-01-15T14:20:00.0000000+00:00",
   "AdditionalInfo": "Discord account checker with Nitro detection - Email:Password version",
   "RequiredPlugins": [],
-  "Author": "@Chakker",
+  "Author": "@ALLAY_XD_20",
   "Version": "2.0.0 [SB]",
   "SaveEmptyCaptures": false,
   "ContinueOnCustom": false,
@@ -33,7 +33,7 @@
   ],
   "CustomInputs": [
     {
-      "Description": "Discord Checker by Chakker - Email:Password with Nitro detection",
+      "Description": "Discord Checker by ALLAY_XD_20 - Email:Password with Nitro detection",
       "VariableName": "",
       "Id": 987654321
     }
